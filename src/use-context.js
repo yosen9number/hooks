@@ -16,6 +16,6 @@ const Child = () => {
 
     return <p>{value
     }</p>
-}
+};
 
 ReactDOM.render(<App />, document.getElementById('root'));
