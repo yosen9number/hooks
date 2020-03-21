@@ -20,19 +20,36 @@ const App = () => {
     }
 };
 
+const getPlanet = (id) => {
+    return  fetch(`https://swapi.co/api/planets/${id}`)
+        .then(res => res.json())
+        .then(data => data);
+};
 
-const PlanetInfo = ({id}) => {
-    const [name, setName] = useState("Planet Name");
+const useRequest = (request) => {
+    const [dataState, setDataState] = useState(null);
 
     useEffect(() => {
         let canselled = false;
-        fetch(`https://swapi.co/api/planets/${id}`)
-            .then(res => res.json())
-            .then(data => !canselled && setName(data.name));
+        request()
+            .then(data => !canselled && setDataState(data));
         return () => canselled = true;
-    }, [id]);
+    }, [request]);
+
+    return dataState;
+};
+
+const usePlanetInfo = (id) => {
+    const request = () => getPlanet(id);
+    return useRequest(request);
+};
+
+
+const PlanetInfo = ({id}) => {
+    const data = usePlanetInfo(id);
+
     return (
-        <div>{id} - {name}</div>
+        <div>{id} - {data && data.name}</div>
     );
 };
 
