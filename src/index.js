@@ -12,8 +12,7 @@ const App = () => {
                     onClick={() => setValue((v) => v + 1)}>+</button>
                 <button
                     onClick={() => setVisible(false)}>hide</button>
-                <HookCounter value={value} />
-                <ClassCounter value={value} />
+                <Notification />
             </div>
         );
     } else {
@@ -21,12 +20,26 @@ const App = () => {
     }
 };
 
+const Notification = () => {
+    const [visible, setVisible] = useState(true);
+
+    useEffect(() => {
+        const timeout = setTimeout(() => setVisible(false), 3000);
+        return () => clearTimeout(timeout);
+    }, []);
+
+    return  (<div>
+        {visible && <p>Hello</p>}
+    </div>);
+};
+
 const HookCounter = ({value}) => {
     useEffect(() => {
-        console.log('useEffect');
-
-        return() => console.log('clear');
-    }, [value]);
+        console.log('mount');
+        return  console.log('unmount');
+    }, []);
+    useEffect(() => console.log('update'));
+    useEffect(() => () => console.log('unmount'), []);
     return <p>{value}</p>
 };
 
