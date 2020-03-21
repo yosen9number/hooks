@@ -1,4 +1,4 @@
-import React, {Component, useEffect, useState} from 'react';
+import React, {Component, useCallback, useEffect, useState, useMemo} from 'react';
 import ReactDOM from 'react-dom';
 
 const App = () => {
@@ -27,29 +27,52 @@ const getPlanet = (id) => {
 };
 
 const useRequest = (request) => {
-    const [dataState, setDataState] = useState(null);
+    const initialState = useMemo(() => ({
+        data: null,
+        loading: true,
+        error: null
+    }), []);
+    const [dataState, setDataState] = useState(initialState);
 
     useEffect(() => {
+        setDataState(initialState);
+
+
         let canselled = false;
         request()
-            .then(data => !canselled && setDataState(data));
+            .then(data => !canselled && setDataState({
+                data,
+                loading: false,
+                error: false
+            }))
+            .catch(error => !canselled && setDataState({
+                data: null,
+                loading: false,
+                error
+            }));
         return () => canselled = true;
-    }, [request]);
+    }, [request, initialState]);
 
     return dataState;
 };
 
 const usePlanetInfo = (id) => {
-    const request = () => getPlanet(id);
+    const request = useCallback(() => getPlanet(id), [id]);
     return useRequest(request);
 };
 
 
 const PlanetInfo = ({id}) => {
-    const data = usePlanetInfo(id);
+    const {data, loading, error} = usePlanetInfo(id);
 
+    if (error) {
+        return <div>Something is worn</div>
+    }
+    if (loading) {
+        return <div>Loading...</div>
+    }
     return (
-        <div>{id} - {data && data.name}</div>
+        <div>{id} - {data.name}</div>
     );
 };
 
